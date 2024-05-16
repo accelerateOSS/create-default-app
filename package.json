@@ -1,12 +1,12 @@
 {
   "name": "create-default-app",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "sahityakumarchoubey",
   "license": "ISC",
   "bin": {
     "create-default-app": "./index.js"
@@ -16,6 +16,6 @@
     "chalk": "^5.3.0",
     "fs-extra": "^11.2.0"
   },
-  "keywords": [],
-  "description": ""
+  "keywords": ["cli","terminal"],
+  "description": "create-default-app is a quick way to initialize a default web project."
 }
