@@ -65,7 +65,7 @@ async function main() {
 
     async function copyFiles() {
       try {
-        const files = await fs.readdir(path.join("./", "files"));
+        const files = await fs.readdir(path.join(__dirname, "files"));
         const existingFiles = await fs.readdir(path.join("./", projectName));
         const conflicts = files.filter((file) => existingFiles.includes(file));
 
@@ -88,17 +88,17 @@ async function main() {
 
         if (styleFramework == "none") {
           await fs.copy(
-            path.join("./", "files", "default"),
+            path.join(__dirname, "files", "default"),
             path.join("./", projectName)
           );
         } else if (styleFramework == "bootstrap") {
           await fs.copy(
-            path.join("./", "files", "bootstrap"),
+            path.join(__dirname, "files", "bootstrap"),
             path.join("./", projectName)
           );
         } else if (styleFramework == "tailwindcss") {
           await fs.copy(
-            path.join("./", "files", "tailwindcss"),
+            path.join(__dirname, "files", "tailwindcss"),
             path.join("./", projectName)
           );
         }
