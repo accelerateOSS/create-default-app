@@ -14,9 +14,13 @@ import child_process from "child_process";
 import fs from "fs-extra";
 import path from "path";
 import chalk from "chalk";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 async function main() {
   try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
     intro(chalk.blueBright(" create-default-app "));
 
     let projectName = await text({
@@ -102,6 +106,10 @@ async function main() {
             path.join("./", projectName)
           );
         }
+        await fs.copy(
+          path.join(__dirname, "files", "app.js"),
+          path.join("./", projectName, "app.js")
+        );
       } catch (err) {
         console.error(chalk.redBright(err));
         process.exit(0);
