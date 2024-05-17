@@ -16,6 +16,9 @@ import path from "path";
 import chalk from "chalk";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { promisify } from "util";
+
+const exec = promisify(child_process.exec);
 
 async function main() {
   try {
@@ -51,31 +54,29 @@ async function main() {
       process.exit(0);
     }
 
-    const s = spinner();
-    s.start("initializing project");
-
-    try {
-      const folder = await fs.readdir(path.join("./"));
-      if (folder.includes(projectName)) {
-        cancel("directory already exists");
-        process.exit(0);
-      }
-      await fs.mkdir(path.join("./", projectName));
-    } catch (err) {
-      console.log(chalk.redBright(err));
-      cancel("create-default-app scaffold cancelled.");
-      process.exit(0);
-    }
-
-    async function copyFiles() {
+    async function handleScaffold() {
       try {
+        const spin = spinner();
+        spin.start("Initializing project");
+        try {
+          const folder = await fs.readdir(path.join("./"));
+          if (folder.includes(projectName)) {
+            cancel("Directory already exists");
+            process.exit(0);
+          }
+          await fs.mkdir(path.join("./", projectName));
+        } catch (err) {
+          console.log(chalk.redBright(" An error occurred: ", err));
+          cancel("create-default-app scaffold cancelled.");
+          process.exit(0);
+        }
+
         const files = await fs.readdir(path.join(__dirname, "files"));
         const existingFiles = await fs.readdir(path.join("./", projectName));
         const conflicts = files.filter((file) => existingFiles.includes(file));
-
         if (conflicts.length > 0) {
           console.error(
-            `The following files already exist in the directory: ${conflicts.join(
+            ` The following files already exist in the directory: ${conflicts.join(
               ", "
             )}`
           );
@@ -110,56 +111,50 @@ async function main() {
           path.join(__dirname, "files", "app.js"),
           path.join("./", projectName, "app.js")
         );
-      } catch (err) {
-        console.error(chalk.redBright(err));
+
+        await exec("npm init -y", {
+          cwd: path.join("./", projectName),
+        });
+
+        spin.message("Installing tailwindcss via npm");
+        if (styleFramework == "tailwindcss") {
+          await exec("npm install -D tailwindcss", {
+            cwd: path.join("./", projectName),
+          });
+        }
+        spin.stop("Initialization complete");
+        outro(chalk.greenBright(`Project scaffolded successfully!`));
+
+        console.log(chalk.blueBright(` use command "cd ${projectName}"`));
+        if (styleFramework == "tailwindcss") {
+          console.log(
+            chalk.blueBright(
+              ` use command "npx tailwindcss -i ${path.join(
+                "./",
+                "style.css"
+              )} -o ${path.join(
+                "./",
+                "output.css"
+              )} --watch" to process tailwindcss`
+            )
+          );
+        }
+      } catch (error) {
+        console.log(chalk.redBright("An error occurred: ", error));
+        cancel(" create-default-app scaffold was cancelled.");
         process.exit(0);
       }
     }
 
-    await copyFiles();
-
-    try {
-      child_process.execSync("npm init -y", {
-        cwd: path.join("./", projectName),
-      });
-    } catch (error) {
-      console.error(
-        `Failed to initialize npm in project ${projectName}:`,
-        error
-      );
-      process.exit(1);
-    }
-    if (styleFramework == "tailwindcss") {
-      child_process.execSync("npm install -D tailwindcss", {
-        cwd: path.join("./", projectName),
-      });
-    }
-
-    s.stop("initialization complete");
-
-    if (isCancel(projectName)) {
-      cancel("create-default-app scaffold cancelled.");
-      process.exit(0);
-    }
-
-    outro(
-      chalk.greenBright(` project ${projectName} scaffolded successfully! `)
-    );
-
-    if (styleFramework == "tailwindcss") {
-      console.log(
-        chalk.blueBright(
-          "use command `npx tailwindcsscss -i ./style.css -o ./output.css --watch` to process tailwindcss"
-        )
-      );
-    }
+    await handleScaffold();
   } catch (error) {
     if (isCancel(error)) {
       console.log(
         chalk.redBright(" create-default-app scaffold was cancelled. ")
       );
+      process.exit(0);
     } else {
-      console.error(error);
+      console.log(chalk.redBright(" An error occurred: ", error));
     }
   }
 }
