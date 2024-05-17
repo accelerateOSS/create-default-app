@@ -149,7 +149,7 @@ async function main() {
     if (styleFramework == "tailwindcss") {
       console.log(
         chalk.blueBright(
-          "use command `npx tailwindcsscss -i ./src/input.css -o ./src/output.css --watch` to process tailwindcss"
+          "use command `npx tailwindcsscss -i ./style.css -o ./output.css --watch` to process tailwindcss"
         )
       );
     }
