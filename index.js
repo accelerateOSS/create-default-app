@@ -17,14 +17,29 @@ import chalk from "chalk";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { promisify } from "util";
+import figlet from "figlet";
+import gradient from "gradient-string";
 
 const exec = promisify(child_process.exec);
+const figletPromise = (text) => {
+  return new Promise((resolve, reject) => {
+    figlet(text, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log(gradient.pastel.multiline(data));
+        resolve();
+      }
+    });
+  });
+};
 
 async function main() {
   try {
+    await figletPromise("create - default - app");
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
-    intro(chalk.blueBright(" create-default-app "));
+    intro(chalk.blueBright("create-default-app"));
 
     let projectName = await text({
       message: "What is the name of your project?",
@@ -53,6 +68,11 @@ async function main() {
       cancel("create-default-app scaffold cancelled.");
       process.exit(0);
     }
+
+    const gitInit = await confirm({
+      message: "Do you want to initialize Git?",
+      initialValue: false,
+    });
 
     async function handleScaffold() {
       try {
@@ -122,21 +142,29 @@ async function main() {
             cwd: path.join("./", projectName),
           });
         }
+        if (gitInit) {
+          spin.message("Initializing Git");
+          await exec("git init", {
+            cwd: path.join("./", projectName),
+          });
+        }
         spin.stop("Initialization complete");
-        outro(chalk.greenBright(`Project scaffolded successfully!`));
+        outro(chalk.blueBright(`Project scaffolded successfully!`));
 
-        console.log(chalk.blueBright(` use command "cd ${projectName}"`));
+        console.log(
+          chalk.magentaBright(" use command"),
+          chalk.greenBright.bold(`cd ${projectName}`)
+        );
         if (styleFramework == "tailwindcss") {
           console.log(
-            chalk.blueBright(
-              ` use command "npx tailwindcss -i ${path.join(
+            chalk.magentaBright(` use command`),
+            chalk.greenBright.bold(
+              `npx tailwindcss -i ${path.join(
                 "./",
                 "style.css"
-              )} -o ${path.join(
-                "./",
-                "output.css"
-              )} --watch" to process tailwindcss`
-            )
+              )} -o ${path.join("./", "output.css")} --watch`
+            ),
+            chalk.magentaBright(`to process tailwindcss`)
           );
         }
       } catch (error) {
