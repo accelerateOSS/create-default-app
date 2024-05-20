@@ -44,9 +44,17 @@ async function main() {
     let projectName = await text({
       message: "What is the name of your project?",
       placeholder: "my-project",
+      initialValue: "my-project",
       validate(value) {
         if (value.length === 0) return `project name is required!`;
         if (value.match(" ") !== null) return `invalid project name!`;
+
+        const resolvedPath = path.resolve("./", value);
+        const normalizedPath = path.normalize(resolvedPath);
+
+        if (!normalizedPath.startsWith(path.resolve("./"))) {
+          return `invalid project name!`;
+        }
       },
     });
 
@@ -80,11 +88,15 @@ async function main() {
         spin.start("Initializing project");
         try {
           const folder = await fs.readdir(path.join("./"));
-          if (folder.includes(projectName)) {
+          if (projectName === ".") {
+            projectName = path.join("./");
+          } else if (folder.includes(projectName)) {
             cancel("Directory already exists");
             process.exit(0);
           }
-          await fs.mkdir(path.join("./", projectName));
+          if (projectName !== path.join("./")) {
+            await fs.mkdir(path.join("./", projectName));
+          }
         } catch (err) {
           console.log(chalk.redBright(" An error occurred: ", err));
           cancel("create-default-app scaffold cancelled.");
@@ -153,7 +165,7 @@ async function main() {
 
         console.log(
           chalk.magentaBright(" use command"),
-          chalk.greenBright.bold(`cd ${projectName}`)
+          chalk.greenBright.bold(`cd ${projectName}\n`)
         );
         if (styleFramework == "tailwindcss") {
           console.log(
@@ -164,7 +176,7 @@ async function main() {
                 "style.css"
               )} -o ${path.join("./", "output.css")} --watch`
             ),
-            chalk.magentaBright(`to process tailwindcss`)
+            chalk.magentaBright(`to process tailwindcss\n`)
           );
         }
       } catch (error) {

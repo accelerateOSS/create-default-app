@@ -1,6 +1,6 @@
 {
   "name": "create-default-app",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
   "author": "sahityakumarchoubey",
   "license": "ISC",
   "bin": {
-    "create-default-app": "./index.js"
+    "create-default-app": "index.js"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
@@ -20,8 +20,8 @@
     "utils": "^0.3.1"
   },
   "keywords": [
-    "cli",
-    "terminal"
+    "cli"
   ],
-  "description": "create-default-app is a quick way to initialize a default web project."
+  "description": "create-default-app is a quick way to initialize a default web project.",
+  "devDependencies": {}
 }
